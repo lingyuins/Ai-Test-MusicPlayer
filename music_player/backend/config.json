@@ -1,0 +1,16 @@
+{
+  "music_folders": [
+    "D:\\alist\\music"
+  ],
+  "playlists": {
+    "12": []
+  },
+  "current_playlist": "",
+  "current_song": 0,
+  "play_mode": "order",
+  "volume": 0.7,
+  "equalizer": "rock",
+  "dark_theme": false,
+  "view_style": "grid",
+  "scan_history": []
+}

@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+mutagen
+python-multipart
+python-dotenv
