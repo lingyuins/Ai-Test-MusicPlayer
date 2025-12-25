@@ -10,7 +10,8 @@ class PlaylistScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<MusicProvider>(context);
-    final TextEditingController playlistNameController = TextEditingController();
+    final TextEditingController playlistNameController =
+        TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
@@ -60,20 +61,25 @@ class PlaylistScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10),
                   child: ListTile(
                     title: Text(playlistName),
-                    subtitle: Text('${provider.playlistSongs[playlistName]?.length ?? 0} 首歌曲'),
+                    subtitle: Text(
+                      '${provider.playlistSongs[playlistName]?.length ?? 0} 首歌曲',
+                    ),
                     leading: const Icon(Icons.playlist_play),
                     trailing: PopupMenuButton<String>(
                       onSelected: (value) {
                         if (value == 'rename') {
                           // 重命名播放列表
-                          final TextEditingController renameController = TextEditingController(text: playlistName);
+                          final TextEditingController renameController =
+                              TextEditingController(text: playlistName);
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
                               title: const Text('重命名播放列表'),
                               content: TextField(
                                 controller: renameController,
-                                decoration: const InputDecoration(hintText: '输入新名称'),
+                                decoration: const InputDecoration(
+                                  hintText: '输入新名称',
+                                ),
                               ),
                               actions: [
                                 TextButton(
@@ -83,7 +89,10 @@ class PlaylistScreen extends StatelessWidget {
                                 TextButton(
                                   onPressed: () {
                                     if (renameController.text.isNotEmpty) {
-                                      provider.renamePlaylist(playlistName, renameController.text);
+                                      provider.renamePlaylist(
+                                        playlistName,
+                                        renameController.text,
+                                      );
                                       Navigator.pop(context);
                                     }
                                   },
@@ -117,7 +126,10 @@ class PlaylistScreen extends StatelessWidget {
                         }
                       },
                       itemBuilder: (context) => [
-                        const PopupMenuItem(value: 'rename', child: Text('重命名')),
+                        const PopupMenuItem(
+                          value: 'rename',
+                          child: Text('重命名'),
+                        ),
                         const PopupMenuItem(value: 'delete', child: Text('删除')),
                       ],
                     ),
@@ -126,7 +138,8 @@ class PlaylistScreen extends StatelessWidget {
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
-                        builder: (context) => PlaylistDetailScreen(playlistName: playlistName),
+                        builder: (context) =>
+                            PlaylistDetailScreen(playlistName: playlistName),
                       );
                     },
                   ),
@@ -184,7 +197,10 @@ class PlaylistDetailScreen extends StatelessWidget {
                   leading: const Icon(Icons.music_note),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
-                    onPressed: () => provider.removeSongFromPlaylist(playlistName, song.path),
+                    onPressed: () => provider.removeSongFromPlaylist(
+                      playlistName,
+                      song.path,
+                    ),
                   ),
                   onTap: () => provider.playMusic(song),
                 );
@@ -196,7 +212,8 @@ class PlaylistDetailScreen extends StatelessWidget {
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
-            builder: (context) => AddToPlaylistScreen(playlistName: playlistName),
+            builder: (context) =>
+                AddToPlaylistScreen(playlistName: playlistName),
           );
         },
         tooltip: '添加歌曲',

@@ -10,9 +10,7 @@ class SettingsScreen extends StatelessWidget {
     final provider = Provider.of<MusicProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('设置'),
-      ),
+      appBar: AppBar(title: const Text('设置')),
       body: ListView(
         children: [
           // 播放设置
@@ -21,7 +19,10 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               children: [
                 const ListTile(
-                  title: Text('播放设置', style: TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(
+                    '播放设置',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
                 ListTile(
                   leading: const Icon(Icons.repeat),
@@ -30,8 +31,8 @@ class SettingsScreen extends StatelessWidget {
                     value: provider.isRepeat
                         ? 'repeat'
                         : provider.isShuffle
-                            ? 'shuffle'
-                            : 'order',
+                        ? 'shuffle'
+                        : 'order',
                     onChanged: (value) {
                       if (value != null) {
                         provider.setPlayMode(mode: value);
@@ -54,7 +55,10 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               children: [
                 const ListTile(
-                  title: Text('音效设置', style: TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(
+                    '音效设置',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
                 ListTile(
                   leading: const Icon(Icons.equalizer),
@@ -85,7 +89,10 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               children: [
                 const ListTile(
-                  title: Text('界面设置', style: TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(
+                    '界面设置',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
                 SwitchListTile(
                   title: const Text('深色主题'),
@@ -96,7 +103,9 @@ class SettingsScreen extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.view_list),
                   title: const Text('列表显示样式'),
-                  trailing: Text(provider.viewStyle == 'list' ? '列表视图' : '网格视图'),
+                  trailing: Text(
+                    provider.viewStyle == 'list' ? '列表视图' : '网格视图',
+                  ),
                   onTap: () => provider.toggleViewStyle(),
                 ),
               ],
@@ -109,7 +118,10 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               children: [
                 const ListTile(
-                  title: Text('音频设置', style: TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(
+                    '音频设置',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
                 ListTile(
                   leading: const Icon(Icons.headphones),
@@ -139,7 +151,10 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               children: [
                 const ListTile(
-                  title: Text('睡眠模式', style: TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(
+                    '睡眠模式',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
                 ListTile(
                   leading: const Icon(Icons.timer),
@@ -165,7 +180,10 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               children: [
                 const ListTile(
-                  title: Text('缓存与清理', style: TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(
+                    '缓存与清理',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
                 ListTile(
                   leading: const Icon(Icons.delete),
