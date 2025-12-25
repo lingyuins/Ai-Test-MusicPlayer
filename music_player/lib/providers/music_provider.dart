@@ -31,7 +31,8 @@ class MusicProvider extends ChangeNotifier {
 
   // Getters
   List<Music> get musicFiles => _musicFiles;
-  List<Music> get filteredMusic => _filteredMusic.isEmpty ? _musicFiles : _filteredMusic;
+  List<Music> get filteredMusic =>
+      _filteredMusic.isEmpty ? _musicFiles : _filteredMusic;
   List<String> get playlists => _playlists;
   Map<String, List<String>> get playlistSongs => _playlistSongs;
   Music? get currentSong => _currentSong;
@@ -51,23 +52,23 @@ class MusicProvider extends ChangeNotifier {
   Future<void> initialize() async {
     // 初始化音频播放器
     _audioPlayer = AudioPlayer();
-    
+
     // 设置音频会话
     final session = await AudioSession.instance;
-    await session.configure(const AudioSessionConfiguration.speech());
-    
+    await session.configure(const AudioSessionConfiguration.music());
+
     // 监听播放状态变化
     _audioPlayer.playerStateStream.listen((state) {
       _isPlaying = state.playing;
       notifyListeners();
     });
-    
+
     // 监听播放位置变化
     _audioPlayer.positionStream.listen((position) {
       _currentPosition = position.inSeconds.toDouble();
       notifyListeners();
     });
-    
+
     // 监听播放完成事件
     _audioPlayer.playerStateStream.listen((state) {
       if (state.processingState == ProcessingState.completed) {
@@ -84,10 +85,10 @@ class MusicProvider extends ChangeNotifier {
         }
       }
     });
-    
+
     // 初始化音量
     _audioPlayer.setVolume(_volume);
-    
+
     // 初始化其他数据
     await fetchConfig();
     await fetchMusicFiles();
@@ -199,7 +200,7 @@ class MusicProvider extends ChangeNotifier {
         _playlists = playlists.keys.toList();
         _playlistSongs = {
           for (var entry in playlists.entries)
-            entry.key: List<String>.from(entry.value)
+            entry.key: List<String>.from(entry.value),
         };
         notifyListeners();
       }
@@ -269,7 +270,10 @@ class MusicProvider extends ChangeNotifier {
   }
 
   // 从播放列表移除歌曲
-  Future<void> removeSongFromPlaylist(String playlistName, String songPath) async {
+  Future<void> removeSongFromPlaylist(
+    String playlistName,
+    String songPath,
+  ) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/playlists/remove-song'),
@@ -311,7 +315,7 @@ class MusicProvider extends ChangeNotifier {
   // 设置播放模式
   Future<void> setPlayMode({String? mode}) async {
     String playMode;
-    
+
     if (mode != null) {
       // 直接设置指定模式
       playMode = mode;
@@ -360,13 +364,18 @@ class MusicProvider extends ChangeNotifier {
     try {
       _volume = newVolume;
       await _audioPlayer.setVolume(newVolume);
-      final response = await http.post(
-        Uri.parse('$baseUrl/volume'),
-        body: {'volume': newVolume.toString()},
-      );
-      if (response.statusCode == 200) {
-        notifyListeners();
-      }
+      notifyListeners(); // 立即通知UI更新
+
+      // 异步更新后端配置,不阻塞UI
+      http
+          .post(
+            Uri.parse('$baseUrl/volume'),
+            body: {'volume': newVolume.toString()},
+          )
+          .catchError((e) {
+            print('保存音量配置失败: $e');
+            return http.Response('', 500); // 返回一个错误响应
+          });
     } catch (e) {
       print('设置音量失败: $e');
     }
@@ -375,7 +384,8 @@ class MusicProvider extends ChangeNotifier {
   // 随机播放
   void _playRandom() {
     if (_musicFiles.isNotEmpty) {
-      final randomIndex = DateTime.now().millisecondsSinceEpoch % _musicFiles.length;
+      final randomIndex =
+          DateTime.now().millisecondsSinceEpoch % _musicFiles.length;
       _currentIndex = randomIndex;
       _currentSong = _musicFiles[randomIndex];
       _playCurrentSong();
@@ -436,12 +446,19 @@ class MusicProvider extends ChangeNotifier {
   Future<void> _playCurrentSong() async {
     if (_currentSong != null) {
       try {
-        await _audioPlayer.setFilePath(_currentSong!.path);
+        // 将本地文件路径转换为HTTP URL
+        final encodedPath = Uri.encodeComponent(_currentSong!.path);
+        final audioUrl = '$baseUrl/stream/$encodedPath';
+
+        await _audioPlayer.setUrl(audioUrl);
         await _audioPlayer.play();
         _isPlaying = true;
         notifyListeners();
       } catch (e) {
         print('播放音乐失败: $e');
+        print(
+          '音频URL: $baseUrl/stream/${Uri.encodeComponent(_currentSong!.path)}',
+        );
       }
     }
   }

@@ -81,13 +81,47 @@ class _HomeScreenState extends State<HomeScreen> {
                             title: Text(music.title),
                             subtitle: Text('${music.artist} - ${music.album}'),
                             leading: const Icon(Icons.music_note),
-                            trailing: IconButton(
-                              icon: Icon(provider.isPlaying && provider.currentSong == music
-                                  ? Icons.pause
-                                  : Icons.play_arrow),
-                              onPressed: () => provider.playMusic(music),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // 添加到播放列表按钮
+                                PopupMenuButton<String>(
+                                  icon: const Icon(Icons.more_vert),
+                                  onSelected: (playlistName) {
+                                    provider.addSongToPlaylist(playlistName, music.path);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('已添加到 $playlistName')),
+                                    );
+                                  },
+                                  itemBuilder: (context) {
+                                    if (provider.playlists.isEmpty) {
+                                      return [
+                                        const PopupMenuItem<String>(
+                                          enabled: false,
+                                          child: Text('暂无播放列表'),
+                                        ),
+                                      ];
+                                    }
+                                    return provider.playlists.map((playlist) {
+                                      return PopupMenuItem<String>(
+                                        value: playlist,
+                                        child: Text('添加到 $playlist'),
+                                      );
+                                    }).toList();
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(provider.isPlaying && provider.currentSong == music
+                                      ? Icons.pause
+                                      : Icons.play_arrow),
+                                  onPressed: () => provider.playMusic(music),
+                                ),
+                              ],
                             ),
-                            onTap: () => Navigator.pushNamed(context, '/player'),
+                            onTap: () {
+                              provider.playMusic(music);
+                              Navigator.pushNamed(context, '/player');
+                            },
                           );
                         },
                       )
@@ -100,7 +134,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         itemBuilder: (context, index) {
                           final music = provider.filteredMusic[index];
                           return InkWell(
-                            onTap: () => Navigator.pushNamed(context, '/player'),
+                            onTap: () {
+                              provider.playMusic(music);
+                              Navigator.pushNamed(context, '/player');
+                            },
                             child: Card(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -123,11 +160,41 @@ class _HomeScreenState extends State<HomeScreen> {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  IconButton(
-                                    icon: Icon(provider.isPlaying && provider.currentSong == music
-                                        ? Icons.pause
-                                        : Icons.play_arrow),
-                                    onPressed: () => provider.playMusic(music),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      PopupMenuButton<String>(
+                                        icon: const Icon(Icons.more_vert),
+                                        onSelected: (playlistName) {
+                                          provider.addSongToPlaylist(playlistName, music.path);
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('已添加到 $playlistName')),
+                                          );
+                                        },
+                                        itemBuilder: (context) {
+                                          if (provider.playlists.isEmpty) {
+                                            return [
+                                              const PopupMenuItem<String>(
+                                                enabled: false,
+                                                child: Text('暂无播放列表'),
+                                              ),
+                                            ];
+                                          }
+                                          return provider.playlists.map((playlist) {
+                                            return PopupMenuItem<String>(
+                                              value: playlist,
+                                              child: Text('添加到 $playlist'),
+                                            );
+                                          }).toList();
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: Icon(provider.isPlaying && provider.currentSong == music
+                                            ? Icons.pause
+                                            : Icons.play_arrow),
+                                        onPressed: () => provider.playMusic(music),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),

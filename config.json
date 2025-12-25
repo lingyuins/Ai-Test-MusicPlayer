@@ -2,9 +2,7 @@
   "music_folders": [
     "D:\\alist\\music"
   ],
-  "playlists": {
-    "12": []
-  },
+  "playlists": {},
   "current_playlist": "",
   "current_song": 0,
   "play_mode": "repeat",

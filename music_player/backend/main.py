@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, StreamingResponse
 import os
 import sys
 import json
@@ -13,6 +14,7 @@ import shutil
 import random
 from typing import List, Dict, Any
 from pathlib import Path
+import urllib.parse
 
 app = FastAPI()
 
@@ -275,6 +277,40 @@ async def clean_cache():
         shutil.rmtree(cache_folder)
         cache_folder.mkdir(exist_ok=True)
     return {"status": "success"}
+
+@app.get("/api/stream/{file_path:path}")
+async def stream_audio(file_path: str):
+    """流式传输音频文件"""
+    # URL解码文件路径
+    decoded_path = urllib.parse.unquote(file_path)
+    
+    if not os.path.exists(decoded_path):
+        raise HTTPException(status_code=404, detail="Audio file not found")
+    
+    # 检查文件扩展名是否为支持的音频格式
+    ext = os.path.splitext(decoded_path)[1].lower()
+    if ext not in supported_formats:
+        raise HTTPException(status_code=400, detail="Unsupported audio format")
+    
+    # 根据文件类型设置MIME类型
+    mime_types = {
+        '.mp3': 'audio/mpeg',
+        '.wav': 'audio/wav',
+        '.flac': 'audio/flac',
+        '.aac': 'audio/aac',
+        '.ogg': 'audio/ogg',
+        '.m4a': 'audio/mp4',
+        '.wma': 'audio/x-ms-wma'
+    }
+    media_type = mime_types.get(ext, 'audio/mpeg')
+    
+    # 返回文件流
+    def iter_file():
+        with open(decoded_path, 'rb') as f:
+            while chunk := f.read(1024 * 1024):  # 每次读取1MB
+                yield chunk
+    
+    return StreamingResponse(iter_file(), media_type=media_type)
 
 if __name__ == "__main__":
     import uvicorn

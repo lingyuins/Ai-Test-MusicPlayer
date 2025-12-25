@@ -24,10 +24,17 @@ Future<void> startBackend() async {
       // 如果打包后的路径不存在，尝试开发环境路径
       scriptDir = path.join(exeDir, '..', '..', '..', 'backend');
       if (!await File(path.join(scriptDir, 'main.py')).exists()) {
-        print('Backend script not found');
-        return;
+        // 尝试当前目录的backend文件夹
+        scriptDir = path.join(Directory.current.path, 'backend');
+        if (!await File(path.join(scriptDir, 'main.py')).exists()) {
+          print('Backend script not found in any expected location');
+          print('Tried: $backendDir, ${path.join(exeDir, '..', '..', '..', 'backend')}, $scriptDir');
+          return;
+        }
       }
     }
+    
+    print('使用后端路径: $scriptDir');
     
     if (Platform.isWindows) {
       // Windows: 使用 VBS 脚本启动，完全隐藏窗口
@@ -43,14 +50,27 @@ Future<void> startBackend() async {
         print('Backend started with VBS launcher');
       } else {
         // 如果 VBS 不存在，尝试使用 pythonw
-        _backendProcess = await Process.start(
-          'pythonw',
-          [path.join(scriptDir, 'main.py')],
-          workingDirectory: scriptDir,
-          mode: ProcessStartMode.detached,
-          runInShell: false,
-        );
-        print('Backend started with pythonw');
+        try {
+          _backendProcess = await Process.start(
+            'pythonw',
+            [path.join(scriptDir, 'main.py')],
+            workingDirectory: scriptDir,
+            mode: ProcessStartMode.detached,
+            runInShell: false,
+          );
+          print('Backend started with pythonw');
+        } catch (e) {
+          // 如果pythonw失败，尝试python
+          print('pythonw failed, trying python: $e');
+          _backendProcess = await Process.start(
+            'python',
+            [path.join(scriptDir, 'main.py')],
+            workingDirectory: scriptDir,
+            mode: ProcessStartMode.detached,
+            runInShell: false,
+          );
+          print('Backend started with python');
+        }
       }
     } else {
       // Linux/Mac: 使用 python3
@@ -64,8 +84,9 @@ Future<void> startBackend() async {
       print('Backend started with python3');
     }
     
-    // 等待一秒确保后端启动
-    await Future.delayed(const Duration(seconds: 1));
+    // 等待2秒确保后端启动
+    await Future.delayed(const Duration(seconds: 2));
+    print('Backend initialization complete');
   } catch (e) {
     print('Failed to start backend: $e');
   }
