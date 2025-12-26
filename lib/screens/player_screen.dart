@@ -45,7 +45,7 @@ class PlayerScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     ),
@@ -91,18 +91,24 @@ class PlayerScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(formatTime(provider.currentPosition.toInt())), // 当前播放时间
+                      Text(formatTime(provider.currentPosition.toInt())),
                       Text(formatTime(provider.currentSong!.duration)),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Slider(
-                    value: provider.currentPosition,
+                    value: provider.currentPosition.clamp(
+                      0.0,
+                      provider.currentSong!.duration.toDouble(),
+                    ),
                     min: 0.0,
-                    max: provider.currentSong!.duration.toDouble(),
+                    max: provider.currentSong!.duration > 0
+                        ? provider.currentSong!.duration.toDouble()
+                        : 1.0,
                     onChanged: (value) async {
-                      // 进度条拖拽处理
-                      await provider.audioPlayer.seek(Duration(seconds: value.toInt()));
+                      await provider.audioPlayer.seek(
+                        Duration(seconds: value.toInt()),
+                      );
                     },
                   ),
                 ],
@@ -115,9 +121,18 @@ class PlayerScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
-                    icon: Icon(provider.isRepeat ? Icons.repeat_one : Icons.repeat),
+                    icon: Icon(
+                      provider.isRepeat
+                          ? Icons.repeat_one
+                          : provider.isShuffle
+                              ? Icons.shuffle_on
+                              : Icons.repeat,
+                    ),
                     onPressed: () => provider.setPlayMode(),
                     iconSize: 30,
+                    color: provider.isRepeat || provider.isShuffle
+                        ? Theme.of(context).primaryColor
+                        : null,
                   ),
                   const SizedBox(width: 20),
                   IconButton(
@@ -140,11 +155,7 @@ class PlayerScreen extends StatelessWidget {
                     iconSize: 40,
                   ),
                   const SizedBox(width: 20),
-                  IconButton(
-                    icon: Icon(provider.isShuffle ? Icons.shuffle_on : Icons.shuffle),
-                    onPressed: () => provider.setPlayMode(),
-                    iconSize: 30,
-                  ),
+                  const SizedBox(width: 30), // 占位,保持对称
                 ],
               ),
 
@@ -179,7 +190,7 @@ class PlayerScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 5,
                         offset: const Offset(0, 2),
                       ),

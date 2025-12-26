@@ -212,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Theme.of(context).primaryColor,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 4,
                     offset: const Offset(0, -2),
                   ),
@@ -233,7 +233,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         Text(
                           provider.currentSong!.artist,
-                          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
@@ -259,7 +261,12 @@ class _HomeScreenState extends State<HomeScreen> {
             _selectedIndex = index;
           });
           if (index == 1) {
-            Navigator.pushNamed(context, '/playlist');
+            Navigator.pushNamed(context, '/playlist').then((_) {
+              // 返回时重置选中索引
+              setState(() {
+                _selectedIndex = 0;
+              });
+            });
           }
         },
         items: const [

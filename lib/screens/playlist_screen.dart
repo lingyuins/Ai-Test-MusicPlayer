@@ -202,7 +202,11 @@ class PlaylistDetailScreen extends StatelessWidget {
                       song.path,
                     ),
                   ),
-                  onTap: () => provider.playMusic(song),
+                  onTap: () {
+                    provider.playMusic(song);
+                    Navigator.of(context).pop(); // 关闭底部弹窗
+                    Navigator.of(context).pushNamed('/player'); // 跳转到播放页面
+                  },
                 );
               },
             ),
